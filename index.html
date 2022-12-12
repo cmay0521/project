@@ -1,13 +1,99 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<html>
+<head>
+	<title>Project 2</title>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<style>
 
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
+		.header {
+		    grid-area: header;
+		    background-color: #D8DCE1;
+		    height: 80px;
+		}
 
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
-<script>
+		#title {
+			font-size: 1.5em;
+			margin-left: 20px;
+			float: left;
+			margin-top: 20px;
+		}
 
+		.header h3 {
+			display: inline;
+			text-align: right;
+			float: right;
+			margin-right: 20px;
+			margin-top: 25px;
+		}
+
+    	text {
+			font-family: Arial;
+			font-size: 15px;
+		}
+		.axis path, .axis line {
+			fill: none;
+			stroke: black;
+			shape-rendering: crispEdges;
+		}
+		.tick text {
+			fill: black;
+			font-size: 11px;
+		}
+
+		rect {
+			stroke: white;
+		}
+
+		#top_graphs {
+			height: 500px;
+			width: 1200px;
+			box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 19%);
+			margin: 20px;
+			overflow: visible;
+		}
+
+		#bottom_graphs {
+			height: 500px;
+			width: 1200px;
+			box-shadow: 0 4px 8px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 19%);
+			margin: 20px;
+		}
+
+		a {
+			text-decoration: none;
+		}
+
+		a:hover {
+			color: red;
+		}
+
+	</style>
+</head>
+<body>
+
+	<div class="header">
+		<h3 id="title">Madden 23 Player Data</h3>
+		<h3>Visualization by Charles May and Jonah Rockey<br><a href="documentation.html">Documentation</a></h3>
+		<a href="player.html?primaryKey=1327">Player page</a>
+	</div>
+
+	<!-- SVG's for age and gender bar graphs -->
+	<div id="top_graphs">
+	<div id="dropdown_container">
+	</div>
+	</div>
+
+	<div class="row" id="bottom_graphs">
+	</div>
+
+	<script>
+	    // Load in data and call functions
+	    d3.csv("Madden23.csv", function(data) {
+		    madden_data = data;
+		    drawBar(madden_data, "All", false);
+		    drawDrop(madden_data);
+		    drawHeight(madden_data, "All", false);
+		});
 
 // set the dimensions and margins of the graph
 var margin = {top: 30, right: 30, bottom: 70, left: 60},
@@ -53,7 +139,7 @@ svg.selectAll("mybar")
     .attr("x", function(d) { return x(d.team); })
     .attr("y", function(d) { return y(d.overall_rating); })
     .attr("width", x.bandwidth())
-    .attr("height", function(d) { return height - y(d.overall_rating); })
+    .attr("height", function(d) { return height - y(d.Value); })
     .attr("fill", "#69b3a2")
 
 })
