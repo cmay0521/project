@@ -84,42 +84,12 @@
 
 
 // Parse the Data
-	 d3.csv("Madden23.csv", function(data) {
-		    madden_data = data;
-		    drawBar(madden_data, "All", false);
-		    drawDrop(madden_data);
-		    drawHeight(madden_data, "All", false);
-		});
+	d3.csv("Madden23.csv", function(data) {
+		madden_data = data;
+		drawGraph(madden_data);
+	});
 
-		
-	    function drawDrop(data) {
 
-		    // Get list of positions
-		    const positions = [...new Set(data.map(item => item.position))];
-		    positions.unshift("All")
-
-		    var onchange = function() {
-                var position = d3.select(this).property('value');
-                if (position === "All") {
-                	drawBar(data, position, false);
-                	drawHeight(madden_data, position, false);
-                } else {
-                    drawBar(data, position, true);
-                    drawHeight(madden_data, position, true);
-                }
-            };
-
-			var select = d3.select('#dropdown_container')
-				.append('select')
-			  	.attr('class','select')
-			    .on('change', onchange);
-
-			var options = select
-			  	.selectAll('option')
-				.data(positions).enter()
-				.append('option')
-				.text(function (d) { return d; });
-		}
 	function drawGraph(data) {
 		// set the dimensions and margins of the graph
 		var margin = {top: 30, right: 30, bottom: 70, left: 60},
@@ -139,8 +109,7 @@
 
 		var x = d3.scaleBand()
 		  .range([ 0, width ])
-		  .domain([20, d3.max(data, function(d) 
-			    	{ return +d.overall_rating })])
+		  .domain(data.map(function(d) { return d.Team; }))
 		  .padding(0.2);
 		svg.append("g")
 		  .attr("transform", "translate(0," + height + ")")
@@ -151,7 +120,7 @@
 
 		// Add Y axis
 		var y = d3.scaleLinear()
-		  .domain([0, d3.max(bins, function(d) { return d.length; })])
+		  .domain([0, 100])
 		  .range([ height, 0]);
 		svg.append("g")
 		  .call(d3.axisLeft(y));
