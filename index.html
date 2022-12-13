@@ -88,6 +88,7 @@
 		madden_data = data;
 		drawGraph(madden_data);
 	});
+
 	
 	function drawGraph(data) {
 		// set the dimensions and margins of the graph
@@ -106,9 +107,9 @@
 	          			"translate(" + margin.left + "," + margin.top + ")");
 
 
-		var x = d3.scaleLinear()
+		var x = d3.scaleBand()
 		  .range([ 0, width ])
-		  .domain([20, 99})])
+		  .domain(data.map(function(d) { return d.Team; }))
 		  .padding(0.2);
 		svg.append("g")
 		  .attr("transform", "translate(0," + height + ")")
@@ -119,7 +120,7 @@
 
 		// Add Y axis
 		var y = d3.scaleLinear()
-		  .domain([0, 20 })])
+		  .domain([0, 100])
 		  .range([ height, 0]);
 		svg.append("g")
 		  .call(d3.axisLeft(y));
