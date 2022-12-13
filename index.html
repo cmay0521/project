@@ -85,9 +85,11 @@
 
 // Parse the Data
 	d3.csv("Madden23.csv", function(data) {
-		madden_data = data;
-		drawGraph(madden_data);
-	});
+		    madden_data = data;
+		    drawBar(madden_data, "All", false);
+		    drawDrop(madden_data);
+		    drawHeight(madden_data, "All", false);
+		});
 	
 	function drawDrop(data) {
 
@@ -147,7 +149,7 @@
 	          			"translate(" + margin.left + "," + margin.top + ")");
 
 
-		var x = d3.scaleBand()
+		var x = d3.scaleLinear()
 		  .range([ 0, width ])
 		  .domain([20, d3.max(data, function(d) 
 			    	{ return +d.overall_rating })])
@@ -158,6 +160,14 @@
 		  .selectAll("text")
 		  .attr("transform", "translate(-10,0)rotate(-45)")
 		  .style("text-anchor", "end");
+		// set the parameters for the histogram
+		var histogram = d3.histogram()
+		    .value(function(d) { return d.overall_rating; })  
+		    .domain(xScale.domain())  
+		    .thresholds(xScale.ticks(70)); 
+
+		// Apply this function to data to get the bins
+		var bins = histogram(data);
 
 		// Add Y axis
 		var y = d3.scaleLinear()
@@ -165,6 +175,17 @@
 		  .range([ height, 0]);
 		svg.append("g")
 		  .call(d3.axisLeft(y));
+		
+		// Append the bar rectangles to the svg element
+		svg.selectAll("rect")
+		    .data(bins)
+		    .enter()
+		    .append("rect")
+		.attr("x", 1)
+		.attr("transform", function(d) { return "translate(" + xScale(d.x0) + "," + yScale(d.length) + ")"; })
+		.attr("width", function(d) { return xScale(d.x1) - xScale(d.x0) -1 ; })
+		.attr("height", function(d) { return height - yScale(d.length); });
+
 
 		// Bars
 		svg.selectAll("rect")
