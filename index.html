@@ -106,6 +106,17 @@
                 }
             };
 
+			var select = d3.select('#dropdown_container')
+				.append('select')
+			  	.attr('class','select')
+			    .on('change', onchange);
+
+			var options = select
+			  	.selectAll('option')
+				.data(positions).enter()
+				.append('option')
+				.text(function (d) { return d; });
+		}
 
 	function drawGraph(data) {
 		// set the dimensions and margins of the graph
