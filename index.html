@@ -84,57 +84,27 @@
 
 
 // Parse the Data
-	// Load in data and call functions
-	    d3.csv("Madden23.csv", function(data) {
-		    madden_data = data;
-		    drawBar(madden_data, "All", false);
-		    drawDrop(madden_data);
-		    drawHeight(madden_data, "All", false);
-		});
+	d3.csv("Madden23.csv", function(data) {
+		madden_data = data;
+		drawGraph(madden_data);
+	});
 
-		
-	    function drawDrop(data) {
 
-		    // Get list of teams
-		    const teams = [...new Set(data.map(item => item.team))];
-		    teams.unshift("All")
+	function drawGraph(data) {
+		// set the dimensions and margins of the graph
+		var margin = {top: 30, right: 30, bottom: 70, left: 60},
+	    	width = 460 - margin.left - margin.right,
+	    	height = 400 - margin.top - margin.bottom;
 
-		    var onchange = function() {
-                var team = d3.select(this).property('value');
-                if (team === "All") {
-                	drawBar(data, team, false);
-                	drawHeight(madden_data, team, false);
-                } else {
-                    drawBar(data, team, true);
-                    drawHeight(madden_data, team, true);
-                }
-            };
 
-			var select = d3.select('#dropdown_container')
-				.append('select')
-			  	.attr('class','select')
-			    .on('change', onchange);
-
-			var options = select
-			  	.selectAll('option')
-				.data(positions).enter()
-				.append('option')
-				.text(function (d) { return d; });
-		}
-
-		
-	    function drawBar(data, position, positional) {
-
-	    	d3.select("svg").remove();
-
-	    	// Define the dimensions of the bar graph
-			var width = 600;
-			var height = 375;
-			
-			if (teams) {
-				data = data.filter(function(d) 
-					{ return d.Team === team; });
-			}
+		// append the svg object to the body of the page
+		var svg = d3.select("#my_dataviz")
+	  		.append("svg")
+	    		.attr("width", width + margin.left + margin.right)
+	    		.attr("height", height + margin.top + margin.bottom)
+	  		.append("g")
+	    			.attr("transform",
+	          			"translate(" + margin.left + "," + margin.top + ")");
 
 
 		var x = d3.scaleBand()
@@ -147,15 +117,6 @@
 		  .selectAll("text")
 		  .attr("transform", "translate(-10,0)rotate(-45)")
 		  .style("text-anchor", "end");
-		
-		// set the parameters for the histogram
-		var histogram = d3.histogram()
-		    .value(function(d) { return d.overall_rating; })  
-		    .domain(xScale.domain())  
-		    .thresholds(xScale.ticks(70)); 
-
-		// Apply this function to data to get the bins
-		var bins = histogram(data);
 
 		// Add Y axis
 		var y = d3.scaleLinear()
