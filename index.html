@@ -89,23 +89,6 @@
 		drawGraph(madden_data);
 		drawDrop(madden_data);
 	});
-	
-	function drawDrop(data) {
-
-		    // Get list of positions
-		    const teams = [...new Set(data.map(item => item.team))];
-		    teams.unshift("All")
-
-		    var onchange = function() {
-                var team = d3.select(this).property('value');
-                if (team === "All") {
-                	drawBar(data, team, false);
-                	drawHeight(madden_data, team, false);
-                } else {
-                    drawBar(data, team, true);
-                    drawHeight(madden_data, team, true);
-                }
-
 
 	function drawGraph(data) {
 		// set the dimensions and margins of the graph
