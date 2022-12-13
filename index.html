@@ -77,7 +77,10 @@
 		<a href="player.html?primaryKey=1327">Player page</a>
 	</div>
 
-	<div class="row" id="my_dataviz">
+	
+	<div id="my_dataviz">
+	<div id="dropdown_container">
+	</div>
 	</div>
 
 <script>
@@ -86,69 +89,123 @@
 // Parse the Data
 	d3.csv("Madden23.csv", function(data) {
 		madden_data = data;
-		drawGraph(madden_data);
+		drawGraph(madden_data, "Rams");
+		drawDrop(madden_data);
 	});
+	
+	function drawDrop(data) {
 
-	function drawGraph(data) {
-		// set the dimensions and margins of the graph
-		var margin = {top: 30, right: 30, bottom: 70, left: 60},
+		    // Get list of positions
+		    const teams = [...new Set(data.map(item => item.Team))];
+
+		    var onchange = function() {
+                var team = d3.select(this).property('value');
+                drawGraph(data, team);
+                //drawHeight(madden_data, team, true);
+            };
+
+			var select = d3.select('#dropdown_container')
+				.append('select')
+			  	.attr('class','select')
+			    .on('change', onchange);
+
+			var options = select
+			  	.selectAll('option')
+				.data(teams).enter()
+				.append('option')
+				.text(function (d) { return d; });
+		}
+
+	
+	    function drawGraph(data, team) {
+
+	    	d3.select("svg").remove();
+
+	    	// set the dimensions and margins of the graph
+			var margin = {top: 30, right: 30, bottom: 70, left: 60},
 	    	width = 460 - margin.left - margin.right,
 	    	height = 400 - margin.top - margin.bottom;
-
-
-		// append the svg object to the body of the page
-		var svg = d3.select("#my_dataviz")
-	  		.append("svg")
-	    		.attr("width", width + margin.left + margin.right)
+			
+			// Filter the data
+			data = data.filter(function(d) 
+				{ return d.Team === team; });
+			
+			// Create the svg element and set its dimensions
+			var svg = d3.select("#my_dataviz")
+			    .append("svg")
+			    .attr("width", width + margin.left + margin.right)
 	    		.attr("height", height + margin.top + margin.bottom)
-	  		.append("g")
-	    			.attr("transform",
-	          			"translate(" + margin.left + "," + margin.top + ")");
+			    .attr("overflow", "visible")
+			    .attr("transform", "translate(70,30)");
 
-
-		var x = d3.scaleBand()
-		  .range([ 0, width ])
-		  .domain([20, d3.max(data, function(d) 
+			// Define the scales for the x and y axes
+			var xScale = d3.scaleLinear()
+			    .domain([20, d3.max(data, function(d) 
 			    	{ return +d.overall_rating })])
-		  .padding(0.2);
-		svg.append("g")
-		  .attr("transform", "translate(0," + height + ")")
-		  .call(d3.axisBottom(x))
-		  .selectAll("text")
-		  .attr("transform", "translate(-10,0)rotate(-45)")
-		  .style("text-anchor", "end");
+			    .range([0, width]);
 
-		// Add Y axis
-		var y = d3.scaleLinear()
-		  .domain([0, 100])
-		  .range([ height, 0]);
-		svg.append("g")
-		  .call(d3.axisLeft(y));
+			svg.append("g")
+			    .attr("transform", "translate(0," + height + ")")
+			    .call(d3.axisBottom(xScale));
 
-		// Bars
-		svg.selectAll("rect")
-		  .data(data)
-		  .enter()
-		  .append("rect")
-		    .attr("x", function(d) { return x(d.team); })
-		    .attr("y", function(d) { return y(d.overall_rating); })
-		    .attr("width", x.bandwidth())
-		    .attr("height", function(d) { return height - y(d.overall_rating); })
-		    .attr("fill", "#69b3a2");
-		
-		svg.append("text")
-		   .attr("x", width / 2)
-		   .attr("y", height + 50)
-		   .attr("text-anchor", "middle")
-		   .text("Player Rating");
+			// set the parameters for the histogram
+			var histogram = d3.histogram()
+			    .value(function(d) { return d.overall_rating; })  
+			    .domain(xScale.domain())  
+			    .thresholds(xScale.ticks(70)); 
 
-		svg.append("text")
-		   .attr("transform", "rotate(-90)")
-		   .attr("x", -height / 2)
-		   .attr("y", -50)
-		   .attr("text-anchor", "middle")
-		   .text("Frequency");
-	}
+			// Apply this function to data to get the bins
+			var bins = histogram(data);
+
+			// Y axis: scale and draw:
+			var yScale = d3.scaleLinear()
+			    .range([height, 0]);
+
+			yScale.domain([0, d3.max(bins, function(d) { return d.length; })]);
+
+			svg.append("g")
+			    .call(d3.axisLeft(yScale));
+
+			// Bars
+			svg.selectAll("rect")
+			    .data(bins)
+			    .enter()
+			    .append("rect")
+		        .attr("x", 1)
+		        .attr("transform", function(d) { return "translate(" + xScale(d.x0) + "," + yScale(d.length) + ")"; })
+		        .attr("width", function(d) { return xScale(d.x1) - xScale(d.x0) -1 ; })
+		        .attr("height", function(d) { return height - yScale(d.length); })
+		        .attr("fill", "#69b3a2");;
+
+			
+			svg.selectAll("g")
+			   .style("font-size", "12px")
+			   .style("font-family", "sans-serif")
+			   .style("color", "black");
+
+			// Add labels to the x and y axes along with title
+			svg.append("text")
+			   .attr("x", width / 2)
+			   .attr("y", height + 50)
+			   .attr("text-anchor", "middle")
+			   .text("Player Rating");
+
+			svg.append("text")
+			   .attr("transform", "rotate(-90)")
+			   .attr("x", -height / 2)
+			   .attr("y", -50)
+			   .attr("text-anchor", "middle")
+			   .text("Frequency");
+
+			
+			svg.append("text")
+		   		.attr("x", width / 2)
+		   		.attr("y", height - 325)
+		   		.attr("text-anchor", "middle")
+			   	.text("Rating Distribution for " + team);
+
+			
+	    }
 
 </script>
 </body>
