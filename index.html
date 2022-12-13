@@ -117,6 +117,18 @@
 				.append('option')
 				.text(function (d) { return d; });
 		}
+	function drawBar(data, team, teams) {
+
+	    	d3.select("svg").remove();
+
+	    	// Define the dimensions of the bar graph
+			var width = 600;
+			var height = 375;
+			
+			if (teams) {
+				data = data.filter(function(d) 
+					{ return d.Team === team; });
+			}
 
 	function drawGraph(data) {
 		// set the dimensions and margins of the graph
