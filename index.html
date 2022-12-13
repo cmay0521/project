@@ -108,8 +108,7 @@
 
 		var x = d3.scaleLinear()
 		  .range([ 0, width ])
-		  .domain([20, d3.max(data, function(d) 
-			{ return +d.overall_rating })])
+		  .domain([20, 99})])
 		  .padding(0.2);
 		svg.append("g")
 		  .attr("transform", "translate(0," + height + ")")
@@ -120,7 +119,7 @@
 
 		// Add Y axis
 		var y = d3.scaleLinear()
-		  .domain([0, d3.max(bins, function(d) { return d.length; })])
+		  .domain([0, 20 })])
 		  .range([ height, 0]);
 		svg.append("g")
 		  .call(d3.axisLeft(y));
